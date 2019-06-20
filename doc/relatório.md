@@ -16,16 +16,30 @@ Assim, o objetivo de algoritmos de aprendizado por reforço é encontrar uma pol
 
 ## O Algoritmo Q-Learning
 
+Neste trabalho foi implementado um algoritmo de aprendizado por reforço conhecido por Q-Learning. Consiste em preencher uma tabela chamada Q-table com valores relacionados a recompensa quando uma determinada ação é tomada a partir de um determinado estado. Estes valores são obtidos a partir da experiência do agente adquirida no decorrer de vários episódios.
+
+A tabela é preenchida iterativamente de acordo com a seguinte relação:
+
+![Alt Text](images/q_eq.png)
+
+Onde `α` é a taxa de aprendizado; `R(s,a)` é a recompensa adquirida quando é realizada a ação `a` no estado `s`; `γ` é uma taxa de desconto que reduz a recompensa considerada no treinamento para passos cada vez mais distantes no futuro; `max(Q'(s',a'))` é o valor de Q para a ação `a` com maior recompensa no estado `s` e `Q(s,a)` é o valor atual de Q.
+
+Desta forma, o valor de Q para o estado atual é calculado levando em conta a recompensa e valores de Q para estados futuros de acordo com cada ação tomada.
 
 ## O Problema
 
-O problema consiste em uma grade quadrada 20x20 onde um agente começará na posição (0, 0) e terá como objetivo chegar na posição (20, 20) podendo dar passos para cima, baixo, esquerda e direita.
+O problema consiste em uma grade quadrada 20x20 onde um agente começará na posição (0, 0) e terá como objetivo chegar na posição (20, 20) podendo dar passos para cima, baixo, esquerda e direita, de forma ao agente caminhar por todos os estados possíveis. Cada estado terá a ele associado um valor de recompensa. A tabela abaixo mostra os valores das recompensas.
 
-Cada passo terá um determinado custo, desta forma o agente aprenderá a atingir o objetivo final da forma mais rápida possível. Além disso, há armadilhas e recompensas espalhadas pelo ambiente. A tabela abaixo mostra os valores das recompensas.
+| Ação | Valor |
+|---|---|
+|STEP|-2|
+|FOOD|5|
+|TRAP|-20|
+|END|-100|
 
-|tabela|
+Cada passo(STEP) terá um determinado custo, desta forma o agente aprenderá a atingir o objetivo final(END) da forma mais rápida possível. Além disso, há armadilhas(TRAP) e recompensas(FOOD) espalhadas pelo ambiente.
 
-Uma representação do ambiente pode ser vista na imagem abaixo.
+Uma representação do ambiente gerado aleatoriamente pode ser vista na imagem abaixo.
 
 imagem
 
