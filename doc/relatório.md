@@ -33,7 +33,15 @@ imagem
 
 Inicialmente o espaço é gerado e o agente posicionado em (0, 0). A partir daí, o agente poderá realizar passos para cima, baixo, direita ou esquerda a cada iteração. Cada estado determinará os passos permitidos, para evitar de o a gente ficar preso indefinidamente em um passo contra os limites do ambiente, por exemplo. O episódio termina quando o agente cai em uma armadilha ou aringe o objetivo final.
 
+Quando o agente passa por uma posição onde haja uma moeda ou armadilha, o valor da recompensa nesta posição é atualizado para representar o consumo do agente.
+
 Todo o programa referente ao ambiente e ao treinamento foi escrito em C++. A paralelização foi feita em OpenMP de forma a distribuir os episódios a cada thread, desta forma cada thread possuirá sua própria Q-table e, ao final, serem reduzidas por meio de soma a Q-table principal. Uma vez treinado, o a gente executará uma simulação e será mostrado cada passo realizado.
 
 ## Treinamento
+
+O treinamento é a parte da implementação que é, de fato, paralela. Definindo o número total de episódios como 10.000, cada thread receberá uma porção destes episódios e gerará sua própria Q-table para mais tarde serem reduzidas em uma principal.
+
+Cada episódio consiste em um reset da posição do agente e tabela de recompensa. Então, a partir de cada estado é determinado qual passo tomar da seguinte forma: Selecione um passo aleatoriamente ou selecione o passo referente ao valor mais alto da Q-table de acordo com uma probabilidade que reduz a cada iteração. Desta forma, o agente é encorajado a explorar o ambiente. Ao final, será atualizada a Q-table.
+
+## Resultados
 
