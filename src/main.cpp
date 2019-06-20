@@ -24,7 +24,6 @@ int main() {
   #pragma omp parallel shared(episodes, lr, y, eps_decay) private(e, a, env, state, eps, r_eps)
   {
     rank = omp_get_thread_num();
-    cout << rank << " ";
     
     for (e = 0; e < episodes; e++) {
       state = env.reset(1);

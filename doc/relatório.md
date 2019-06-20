@@ -16,11 +16,11 @@ Assim, o objetivo de algoritmos de aprendizado por reforço é encontrar uma pol
 
 ## O Algoritmo Q-Learning
 
-Neste trabalho foi implementado um algoritmo de aprendizado por reforço conhecido por Q-Learning. Consiste em preencher uma tabela chamada Q-table com valores relacionados a recompensa quando uma determinada ação é tomada a partir de um determinado estado. Estes valores são obtidos a partir da experiência do agente adquirida no decorrer de vários episódios.
+Neste trabalho é proposto uma forma de paralelização para um algoritmo de aprendizado por reforço conhecido por Q-Learning. Consiste em preencher uma tabela chamada Q-table com valores relacionados a recompensa quando uma determinada ação é tomada a partir de um determinado estado. Estes valores são obtidos a partir da experiência do agente adquirida no decorrer de vários episódios.
 
 A tabela é preenchida iterativamente de acordo com a seguinte relação:
 
-![Alt Text](images/q_eq.png)
+![Q Equation](images/q_eq.png)
 
 Onde `α` é a taxa de aprendizado; `R(s,a)` é a recompensa adquirida quando é realizada a ação `a` no estado `s`; `γ` é uma taxa de desconto que reduz a recompensa considerada no treinamento para passos cada vez mais distantes no futuro; `max(Q'(s',a'))` é o valor de Q para a ação `a` com maior recompensa no estado `s` e `Q(s,a)` é o valor atual de Q.
 
@@ -37,19 +37,21 @@ O problema consiste em uma grade quadrada 20x20 onde um agente começará na pos
 |TRAP|-20|
 |END|-100|
 
-Cada passo(STEP) terá um determinado custo, desta forma o agente aprenderá a atingir o objetivo final(END) da forma mais rápida possível. Além disso, há armadilhas(TRAP) e recompensas(FOOD) espalhadas pelo ambiente.
+Cada passo(STEP) terá um determinado custo, desta forma o agente aprenderá a atingir o objetivo final(END) da forma mais rápida possível. Há armadilhas(TRAP) e recompensas(FOOD) espalhadas pelo ambiente. Além disso, quando o agente passa por uma posição onde haja uma recompensas ou armadilha, o valor da recompensa nesta posição é atualizado para representar o consumo do agente.
 
 Uma representação do ambiente gerado aleatoriamente pode ser vista na imagem abaixo.
 
-imagem
+![Env](images/env.png)
 
 ## Implementação
 
+### O Ambiente
+
 Inicialmente o espaço é gerado e o agente posicionado em (0, 0). A partir daí, o agente poderá realizar passos para cima, baixo, direita ou esquerda a cada iteração. Cada estado determinará os passos permitidos, para evitar de o a gente ficar preso indefinidamente em um passo contra os limites do ambiente, por exemplo. O episódio termina quando o agente cai em uma armadilha ou aringe o objetivo final.
 
-Quando o agente passa por uma posição onde haja uma moeda ou armadilha, o valor da recompensa nesta posição é atualizado para representar o consumo do agente.
+### Paralelismo
 
-Todo o programa referente ao ambiente e ao treinamento foi escrito em C++. A paralelização foi feita em OpenMP de forma a distribuir os episódios a cada thread, desta forma cada thread possuirá sua própria Q-table e, ao final, serem reduzidas por meio de soma a Q-table principal. Uma vez treinado, o a gente executará uma simulação e será mostrado cada passo realizado.
+Todo o programa referente ao ambiente e ao treinamento foi escrito em C++. A paralelização foi feita em OpenMP de forma a distribuir os episódios a cada thread, com uma posição inicial aleatória para cada episódio. desta forma cada thread possuirá sua própria Q-table e, ao final, serão reduzidas por meio de soma a Q-table principal. Uma vez treinado, o a gente executará uma simulação e será mostrado cada passo realizado.
 
 ## Treinamento
 
@@ -58,4 +60,10 @@ O treinamento é a parte da implementação que é, de fato, paralela. Definindo
 Cada episódio consiste em um reset da posição do agente e tabela de recompensa. Então, a partir de cada estado é determinado qual passo tomar da seguinte forma: Selecione um passo aleatoriamente ou selecione o passo referente ao valor mais alto da Q-table de acordo com uma probabilidade que reduz a cada iteração. Desta forma, o agente é encorajado a explorar o ambiente. Ao final, será atualizada a Q-table.
 
 ## Resultados
+
+Uma vez obtida a Q-table, foi realizada uma simulação de como o agente se comporta no ambiente com o propósito de verificar se este foi devidamente treinado. A imagem abaixo mostra o percurso do agente.
+
+![Play](images/play.png)
+
+## Conclusões
 
