@@ -1,9 +1,3 @@
----
-Título: Q-Learning Paralelo com OpenMP
-Disciplina: Computação de Alto Desempenho - UFRN
-Autor: Silvan Ferreira da Silva Júnior
----
-
 # Q-Learning Paralelo com OpenMP
 
 ## Introdução
@@ -24,7 +18,7 @@ Neste trabalho é proposto uma forma de paralelização para um algoritmo de apr
 
 A tabela é preenchida iterativamente de acordo com a seguinte relação:
 
-![Q Equation](images/q_eq.png)
+![Q Equation](doc/images/q_eq.png)
 
 Onde `α` é a taxa de aprendizado; `R(s,a)` é a recompensa adquirida quando é realizada a ação `a` no estado `s`; `γ` é uma taxa de desconto que reduz a recompensa considerada no treinamento para passos cada vez mais distantes no futuro; `max(Q'(s',a'))` é o valor de Q para a ação `a` com maior recompensa no estado `s` e `Q(s,a)` é o valor atual de Q.
 
@@ -45,7 +39,7 @@ Cada passo(STEP) terá um determinado custo, desta forma o agente aprenderá a a
 
 Uma representação do ambiente gerado aleatoriamente pode ser vista na imagem abaixo.
 
-![Env](images/env.png)
+![Env](doc/images/env.png)
 
 ## Implementação
 
@@ -71,25 +65,25 @@ Um aspecto importante do treinamento é que existe uma quantidade mínima de ite
 
 Uma vez obtida a Q-table, foi realizada uma simulação de como o agente se comporta no ambiente com o propósito de verificar se este foi devidamente treinado. A imagem abaixo mostra o percurso do agente.
 
-![Play](images/play.png)
+![Play](doc/images/play.png)
 
 ### Tempo de Execução
 
 Foi medido o tempo de execução para cada número de episódios em cada número de threads. Os valores obtidos são mostrados na figura abaixo.
 
-![Play](images/time.png)
+![Play](doc/images/time.png)
 
 ### SpeedUp
 
 O SpeedUp foi obtido a partir da razão entre o tempo de execução para `n` threads pelo tempo com apenas uma therad, como mostrado na figura abaixo.
 
-![Play](images/speedup.png)
+![Play](doc/images/speedup.png)
 
 ### Eficiência
 
 A eficiência é obtida a partir da razão entre o speedup pelo número de threads, como mostrado na figura abaixo.
 
-![Play](images/eficiency.png)
+![Play](doc/images/eficiency.png)
 
 ## Conclusões
 
