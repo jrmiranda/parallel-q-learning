@@ -1,3 +1,9 @@
+---
+titulo: Q-Learning Paralelo com OpenMP
+disciplina: Computação de Alto Desempenho - UFRN
+autor: Silvan Ferreira da Silva Júnior
+---
+
 # Q-Learning Paralelo com OpenMP
 
 ## Introdução
@@ -8,15 +14,13 @@ Estes tipos de algoritmo requerem um treinamento com um grande número de episó
 
 ## Conceitos Básicos
 
-Em aprendizagem por reforço, primeiramente é definido um conjunto de regras, ações permitidas e recompensas por cada ação, que será o universo onde os agentes pertencerão. Ou seja, o **ambiente**.
-
-Um **agente** que interage com este ambiente receberá **recompensas** por cada **ação** realizada, dependendo do **estado** atual no ambiente.
+Em aprendizagem por reforço, primeiramente é definido um conjunto de regras, ações permitidas e recompensas por cada ação, que será o universo onde os agentes pertencerão. Ou seja, o **ambiente**. Um **agente** que interage com este ambiente receberá **recompensas** por cada **ação** realizada, dependendo do **estado** atual no ambiente.
 
 Assim, o objetivo de algoritmos de aprendizado por reforço é encontrar uma política `π(s,a)` onde `s` é o estado atual e `a` é a ação maximizar o acúmulo de recompensas até o objetivo final.
 
 ## O Algoritmo Q-Learning
 
-Neste trabalho é proposto uma forma de paralelização para um algoritmo de aprendizado por reforço conhecido por Q-Learning. Consiste em preencher uma tabela chamada Q-table com valores relacionados a recompensa quando uma determinada ação é tomada a partir de um determinado estado. Estes valores são obtidos a partir da experiência do agente adquirida no decorrer de vários episódios.
+Neste trabalho é proposto uma forma de paralelização para um algoritmo de aprendizado por reforço conhecido por Q-Learning, que consiste em preencher uma tabela chamada Q-table com valores relacionados a recompensa quando uma determinada ação é tomada a partir de um determinado estado. Estes valores são obtidos a partir da experiência do agente adquirida no decorrer de vários episódios.
 
 A tabela é preenchida iterativamente de acordo com a seguinte relação:
 
@@ -51,19 +55,44 @@ Inicialmente o espaço é gerado e o agente posicionado em (0, 0). A partir daí
 
 ### Paralelismo
 
-Todo o programa referente ao ambiente e ao treinamento foi escrito em C++. A paralelização foi feita em OpenMP de forma a distribuir os episódios a cada thread, com uma posição inicial aleatória para cada episódio. desta forma cada thread possuirá sua própria Q-table e, ao final, serão reduzidas por meio de soma a Q-table principal. Uma vez treinado, o a gente executará uma simulação e será mostrado cada passo realizado.
+A paralelização foi feita em OpenMP de forma a distribuir os episódios a cada thread com uma posição inicial aleatória para cada episódio. Desta forma, cada thread possuirá sua própria Q-table e, ao final, serão reduzidas por meio de soma à Q-table principal. 
 
 ## Treinamento
 
-O treinamento é a parte da implementação que é, de fato, paralela. Definindo o número total de episódios como 10.000, cada thread receberá uma porção destes episódios e gerará sua própria Q-table para mais tarde serem reduzidas em uma principal.
+O treinamento é a parte da implementação que é, de fato, paralela. Cada thread receberá uma quantidade de episódios para simular e gerarão suas próprias Q-tables para mais tarde serem reduzidas em uma principal.
 
-Cada episódio consiste em um reset da posição do agente e tabela de recompensa. Então, a partir de cada estado é determinado qual passo tomar da seguinte forma: Selecione um passo aleatoriamente ou selecione o passo referente ao valor mais alto da Q-table de acordo com uma probabilidade que reduz a cada iteração. Desta forma, o agente é encorajado a explorar o ambiente. Ao final, será atualizada a Q-table.
+Cada episódio consiste em um reset da posição do agente e tabela de recompensa. Então, a partir de cada estado é determinado qual passo tomar selecionando um passo aleatoriamente ou o passo referente ao valor mais alto da Q-table de acordo com uma probabilidade que reduz a cada iteração. Assim, o agente é encorajado a explorar o ambiente. Ao final da iteração, será atualizada a Q-table.
+
+Um aspecto importante do treinamento é que existe uma quantidade mínima de iterações para a Q-table obter valores necessários para o agente ser capaz de cumprir o objetivo final. A implementação paralela divide o número dessas iterações pelas threads, fazendo com que cada unidade de execução precise simular somente uma fração das iterações necessárias para convergência.
 
 ## Resultados
+
+### Agente
 
 Uma vez obtida a Q-table, foi realizada uma simulação de como o agente se comporta no ambiente com o propósito de verificar se este foi devidamente treinado. A imagem abaixo mostra o percurso do agente.
 
 ![Play](images/play.png)
 
+### Tempo de Execução
+
+Foi medido o tempo de execução para cada número de episódios em cada número de threads. Os valores obtidos são mostrados na figura abaixo.
+
+![Play](images/time.png)
+
+### SpeedUp
+
+O SpeedUp foi obtido a partir da razão entre o tempo de execução para `n` threads pelo tempo com apenas uma therad, como mostrado na figura abaixo.
+
+![Play](images/speedup.png)
+
+### Eficiência
+
+A eficiência é obtida a partir da razão entre o speedup pelo número de threads, como mostrado na figura abaixo.
+
+![Play](images/eficiency.png)
+
 ## Conclusões
 
+É possível perceber que há uma melhora no tempo de execução a medida que aumenta-se o número de threads. Porém, o programa se classifica como **não escalável** pois não é capaz de manter a eficiência com o aumento do tamanho do problema e do número de threads.
+
+Ainda assim, o programa mostrou uma convergência mais rápida para este tipo de problema quando este é implementado de forma paralela.
