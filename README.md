@@ -1,92 +1,92 @@
-# Q-Learning Paralelo com OpenMP
+# Parallel Q-Learning with OpenMP
 
-## Introdução
+## Introduction
 
-Q-Learning é um algoritmo de aprendizagem por reforço usado para resolver problemas de decisão sequenciais como jogos, robótica e otimização. A ideia básica é a de um agente interagindo com o ambiente por meio de ações e para cada ação em um determinado estado, é fornecida uma determinada recompensa ou custo. Desta forma, ao decorrer de várias iterações, o agente é treinado para atingir o objetivo desejado.
+Q-Learning is a reinforcement learning algorithm used to solve sequential decision problems such as games, robotics and optimization. The basic idea is that of an agent interacting with the environment through actions and for each action in a given state, a certain reward or cost is provided. Thus, over several iterations, the agent is trained to achieve the desired goal.
 
-Estes tipos de algoritmo requerem um treinamento com um grande número de episódios e, portanto, um grande poder computacional é necessário. Para resolver este problema, é proposto neste trabalho uma paralelização desde algoritmo.
+These types of algorithm require training with a large number of episodes and therefore a large computational power is required. To solve this problem, this work proposes a parallelization of this algorithm.
 
-## Conceitos Básicos
+## Basic Concepts
 
-Em aprendizagem por reforço, primeiramente é definido um conjunto de regras, ações permitidas e recompensas por cada ação, que será o universo onde os agentes pertencerão. Ou seja, o **ambiente**. Um **agente** que interage com este ambiente receberá **recompensas** por cada **ação** realizada, dependendo do **estado** atual no ambiente.
+In reinforcement learning, first a set of rules, allowed actions and rewards for each action is defined, which will be the universe where the agents will belong, ie the **environment**. An **agent** who interacts with this environment will receive **rewards** for each **action** taken, depending on the current **state** in the environment.
 
-Assim, o objetivo de algoritmos de aprendizado por reforço é encontrar uma política `π(s,a)` onde `s` é o estado atual e `a` é a ação maximizar o acúmulo de recompensas até o objetivo final.
+Thus, the goal of reinforcement learning algorithms is to find a `π (s, a)` policy where `s` is the current state and` a` is the action to maximize the accumulation of rewards to the ultimate goal.
 
-## O Algoritmo Q-Learning
+## The Q-Learning Algorithm
 
-Neste trabalho é proposto uma forma de paralelização para um algoritmo de aprendizado por reforço conhecido por Q-Learning, que consiste em preencher uma tabela chamada Q-table com valores relacionados a recompensa quando uma determinada ação é tomada a partir de um determinado estado. Estes valores são obtidos a partir da experiência do agente adquirida no decorrer de vários episódios.
+This work proposes a parallelization for a reinforcement learning algorithm known as Q-Learning, which consists in filling a table called Q-table with values related to reward when a certain action is taken from a certain state. These values are obtained from the agent's experience gained over several episodes.
 
-A tabela é preenchida iterativamente de acordo com a seguinte relação:
+The table is filled iteratively according to the following relationship:
 
 ![Q Equation](doc/images/q_eq.png)
 
-Onde `α` é a taxa de aprendizado; `R(s,a)` é a recompensa adquirida quando é realizada a ação `a` no estado `s`; `γ` é uma taxa de desconto que reduz a recompensa considerada no treinamento para passos cada vez mais distantes no futuro; `max(Q'(s',a'))` é o valor de Q para a ação `a` com maior recompensa no estado `s` e `Q(s,a)` é o valor atual de Q.
+Where `α` is the learning rate; `R (s, a)` is the reward gained when performing the `a` action in the` s` state; `γ` is a discount rate that reduces the reward considered in training for increasingly distant steps in the future; `max (Q '(s', a'))` is the value of Q for the highest rewarding action `a` in the` s` state and `Q (s, a)` is the current value of Q.
 
-Desta forma, o valor de Q para o estado atual é calculado levando em conta a recompensa e valores de Q para estados futuros de acordo com cada ação tomada.
+Thus, the Q value for the current state is calculated by taking into account the reward and Q values for future states according to each action taken.
 
-## O Problema
+## The Problem
 
-O problema consiste em uma grade quadrada 20x20 onde um agente começará na posição (0, 0) e terá como objetivo chegar na posição (20, 20) podendo dar passos para cima, baixo, esquerda e direita, de forma ao agente caminhar por todos os estados possíveis. Cada estado terá a ele associado um valor de recompensa. A tabela abaixo mostra os valores das recompensas.
+The problem consists of a 20x20 square grid where an agent will start at position (0, 0) and aim to reach position (20, 20) and can take steps up, down, left and right, so that the agent walks through the possible states. Each state will have a reward value associated with it. The table below shows the values of the rewards.
 
-| Ação | Valor |
+| Action | Value |
 |---|---|
 |STEP|-2|
 |FOOD|5|
 |TRAP|-20|
 |END|-100|
 
-Cada passo(STEP) terá um determinado custo, desta forma o agente aprenderá a atingir o objetivo final(END) da forma mais rápida possível. Há armadilhas(TRAP) e recompensas(FOOD) espalhadas pelo ambiente. Além disso, quando o agente passa por uma posição onde haja uma recompensas ou armadilha, o valor da recompensa nesta posição é atualizado para representar o consumo do agente.
+Each step (STEP) will have a certain cost, so the agent will learn to reach the final goal (END) as quickly as possible. There are traps (TRAP) and rewards (FOOD) scattered throughout the environment. Also, when the agent goes through a position where there is a reward or trap, the reward value in this position is updated to represent the agent's consumption.
 
-Uma representação do ambiente gerado aleatoriamente pode ser vista na imagem abaixo.
+A representation of the randomly generated environment can be seen in the image below.
 
 ![Env](doc/images/env.png)
 
-## Implementação
+## Implementation
 
-### O Ambiente
+### The environment
 
-Inicialmente o espaço é gerado e o agente posicionado em (0, 0). A partir daí, o agente poderá realizar passos para cima, baixo, direita ou esquerda a cada iteração. Cada estado determinará os passos permitidos, para evitar de o a gente ficar preso indefinidamente em um passo contra os limites do ambiente, por exemplo. O episódio termina quando o agente cai em uma armadilha ou aringe o objetivo final.
+Initially the space is generated and the agent positioned at (0, 0). From there, the agent can perform up, down, right, or left steps with each iteration. Each state will determine the allowed steps, to prevent us from being stuck indefinitely in a step against the limits of the environment, for example. The episode ends when the agent falls into a trap or argues the ultimate goal.
 
-### Paralelismo
+### Parallelism
 
-A paralelização foi feita em OpenMP de forma a distribuir os episódios a cada thread com uma posição inicial aleatória para cada episódio. Desta forma, cada thread possuirá sua própria Q-table e, ao final, serão reduzidas por meio de soma à Q-table principal. 
+Parallelization was done in OpenMP to distribute episodes to each thread with a random start position for each episode. This way each thread will have its own Q-table and will eventually be reduced by summing the main Q-table.
 
-## Treinamento
+## Training
 
-O treinamento é a parte da implementação que é, de fato, paralela. Cada thread receberá uma quantidade de episódios para simular e gerarão suas próprias Q-tables para mais tarde serem reduzidas em uma principal.
+Training is the part of implementation that is, in fact, parallel. Each thread will receive a number of episodes to simulate and will generate their own Q-tables for later shrink to one main.
 
-Cada episódio consiste em um reset da posição do agente e tabela de recompensa. Então, a partir de cada estado é determinado qual passo tomar selecionando um passo aleatoriamente ou o passo referente ao valor mais alto da Q-table de acordo com uma probabilidade que reduz a cada iteração. Assim, o agente é encorajado a explorar o ambiente. Ao final da iteração, será atualizada a Q-table.
+Each episode consists of a reset of the agent position and reward table. Then, from each state is determined which step to take by selecting a step randomly or the step relative to the highest Q-table value according to a probability that reduces with each iteration. Thus, the agent is encouraged to explore the environment. At the end of the iteration, the Q-table will be updated.
 
-Um aspecto importante do treinamento é que existe uma quantidade mínima de iterações para a Q-table obter valores necessários para o agente ser capaz de cumprir o objetivo final. A implementação paralela divide o número dessas iterações pelas threads, fazendo com que cada unidade de execução precise simular somente uma fração das iterações necessárias para convergência.
+An important aspect of training is that there is a minimum amount of iterations for Q-table to obtain values needed for the agent to be able to meet the end goal. The parallel implementation divides the number of these iterations across the threads, so each execution unit needs to simulate only a fraction of the iterations required for convergence.
 
-## Resultados
+## Results
 
-### Agente
+### Agent
 
-Uma vez obtida a Q-table, foi realizada uma simulação de como o agente se comporta no ambiente com o propósito de verificar se este foi devidamente treinado. A imagem abaixo mostra o percurso do agente.
+Once Q-table was obtained, a simulation of how the agent behaves in the environment was performed in order to verify that it was properly trained. The image below shows the agent's route.
 
 ![Play](doc/images/play.png)
 
-### Tempo de Execução
+### Runtime
 
-Foi medido o tempo de execução para cada número de episódios em cada número de threads. Os valores obtidos são mostrados na figura abaixo.
+The execution time for each number of episodes in each number of threads was measured. The values obtained are shown in the figure below.
 
 ![Play](doc/images/time.png)
 
 ### SpeedUp
 
-O SpeedUp foi obtido a partir da razão entre o tempo de execução para `n` threads pelo tempo com apenas uma therad, como mostrado na figura abaixo.
+SpeedUp was obtained from the ratio of runtime to `n` threads to time with only one therad, as shown in the figure below.
 
 ![Play](doc/images/speedup.png)
 
-### Eficiência
+### Efficiency
 
-A eficiência é obtida a partir da razão entre o speedup pelo número de threads, como mostrado na figura abaixo.
+Efficiency is obtained from the ratio of speedup to number of threads, as shown in the figure below.
 
 ![Play](doc/images/eficiency.png)
 
-## Conclusões
+## Conclusions
 
-É possível perceber que há uma melhora no tempo de execução a medida que aumenta-se o número de threads. Porém, o programa se classifica como **não escalável** pois não é capaz de manter a eficiência com o aumento do tamanho do problema e do número de threads.
+You can see that there is an improvement in runtime as the number of threads increases. However, the program is classified as **non-scalable** because it is unable to maintain efficiency with increasing problem size and number of threads.
 
-Ainda assim, o programa mostrou uma convergência mais rápida para este tipo de problema quando este é implementado de forma paralela.
+Still, the program showed a faster convergence to this kind of problem when it is implemented in parallel.
